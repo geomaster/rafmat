@@ -145,7 +145,7 @@ def parse_priority(tokens, pos, priority):
             break
 
         pos += 1
-        result = parse_operand(tokens, pos)
+        result = parse_priority(tokens, pos, OP_PRIORITY[operator.type])
         other = result.node
         pos = result.new_pos
         node = node_from_operator(operator, node, other)
