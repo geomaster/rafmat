@@ -45,8 +45,9 @@ def try_match_ident(stream):
     return MatchResult(True, Token(TokenType.IDENT, stream), len(stream))
 
 class LexError(ValueError):
-    def __init__(self, pos):
+    def __init__(self, pos, message):
         self.pos = pos
+        self.message = message
 
 LITERAL_TOKENS = [
         # 2 chars
@@ -112,7 +113,7 @@ def lex(stream):
             result = try_match_ident(rest)
 
         if not result.succeeded:
-            raise LexError(pos)
+            raise LexError(pos, "No suitable token at character `{}`".format(rest[0]))
 
         tokens.append(result.token)
         pos += result.advance
