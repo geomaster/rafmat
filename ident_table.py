@@ -1,4 +1,5 @@
 import function
+import math
 from variable import Variable
 
 FUNCTIONS = {
@@ -14,6 +15,8 @@ FUNCTIONS = {
 class IdentTable:
     def __init__(self):
         self.variables = {}
+        self.get_variable_for_assignment('pi').set(math.pi)
+        self.get_variable_for_assignment('e').set(math.e)
 
     def get_variable_for_assignment(self, name):
         var = None

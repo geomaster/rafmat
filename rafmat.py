@@ -17,7 +17,7 @@ while True:
         node = parse(lex(command))
         try:
             res = node.eval(table)
-            print(Fore.GREEN + str(res))
+            print(Fore.GREEN + str(round(res, 3)))
         except RuntimeError as e:
             print((Fore.RED + "Runtime error: ") + (Style.RESET_ALL + str(e)))
     except ParseError as e:

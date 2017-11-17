@@ -30,13 +30,15 @@ def is_operator(token):
     return token.type in OP_PRIORITY.keys()
 
 def is_operand(token):
-    return token.type in [ TokenType.NUMBER, TokenType.IDENT ]
+    return token.type in [ TokenType.DECIMAL_NUMBER, TokenType.INTEGER_NUMBER, TokenType.IDENT ]
 
 def node_from_operand(operand):
     if operand.type == TokenType.IDENT:
         return an.VariableAstNode(operand.value)
-    elif operand.type == TokenType.NUMBER:
-        return an.NumberAstNode(operand.value)
+    elif operand.type == TokenType.INTEGER_NUMBER:
+        return an.NumberAstNode(operand.value, True)
+    elif operand.type == TokenType.DECIMAL_NUMBER:
+        return an.NumberAstNode(operand.value, False)
     else:
         raise ValueError("Not a valid operand: " + str(operand))
 
