@@ -8,7 +8,7 @@ class Number:
     def eval(self, ident_table):
         return self.number
 
-    def is_int(self):
+    def is_int(self, ident_table):
         return self._is_int
 
     def eval_for_comparison(self, ident_table):
@@ -25,10 +25,11 @@ class Variable:
         self.name = name
 
     def eval(self, ident_table):
-        return ident_table.get_variable(self.name).get()
+        var = ident_table.get_variable(self.name)
+        return int(var.get()) if var.is_int() else var.get()
 
-    def is_int(self):
-        return False
+    def is_int(self, ident_table):
+        return ident_table.get_variable(self.name).is_int()
 
     def eval_for_comparison(self, ident_table):
         return self.name
@@ -52,7 +53,7 @@ class FunctionCall:
 
         return fn.call([n.eval(ident_table) for n in self.param_nodes])
 
-    def is_int(self):
+    def is_int(self, ident_table):
         return False
 
     def eval_for_comparison(self, ident_table):
@@ -72,16 +73,20 @@ class Assignment:
         self.val_node = val_node
 
     def eval(self, ident_table):
+        is_int = self.val_node.is_int(ident_table)
         var_name = self.var_node.eval_for_comparison(ident_table)
         val = self.val_node.eval(ident_table)
-        ident_table.get_variable_for_assignment(var_name).set(val)
-        return val
+        ident_table.get_variable_for_assignment(var_name).set(val, is_int)
+        return int(val) if is_int else val
 
     def eval_for_comparison(self, ident_table):
         return self.var_node.eval_for_comparison(ident_table)
 
     def visit_children(self, fn):
         fn(self.var_node)
+
+    def is_int(self, ident_table):
+        return self.val_node.is_int()
 
     def __repr__(self):
         return '(`{}` = {})'.format(self.var_node, self.val_node)
@@ -94,7 +99,7 @@ class BinaryOp:
     def eval(self, ident_table):
         res = self.apply_op(self.left_node.eval(ident_table),
                 self.right_node.eval(ident_table))
-        if self.left_node.is_int() and self.right_node.is_int():
+        if self.left_node.is_int(ident_table) and self.right_node.is_int(ident_table):
             return int(res)
         else:
             return res
@@ -105,11 +110,11 @@ class BinaryOp:
     def apply_op(self, left, right):
         raise NotImplementedError('BinaryOp.apply_op is abstract')
 
-    def is_int(self):
-        return self.left_node.is_int() and self.right_node.is_int()
+    def is_int(self, ident_table):
+        return self.left_node.is_int(ident_table) and self.right_node.is_int(ident_table)
 
     def eval_for_comparison(self, ident_table):
-        return self.var_name
+        return self.eval(ident_table)
 
     def visit_children(self, fn):
         fn(self.left_node)
@@ -125,6 +130,13 @@ class ComparisonOp(BinaryOp):
         right_c = self.right_node.eval_for_comparison(ident_table)
         left_e = self.left_node.eval(ident_table)
         right_e = self.right_node.eval(ident_table)
+
+        # Variable
+        if type(right_c) == str:
+            right_c = ident_table.get_variable(right_c).get()
+        if type(left_c) == str:
+            left_c = ident_table.get_variable(left_c).get()
+
         return left_e and right_e and bool(self.apply_op(left_c, right_c))
 
     def eval_for_comparison(self, ident_table):
