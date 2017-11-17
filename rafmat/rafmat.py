@@ -2,6 +2,7 @@ from colorama import init, Fore, Style
 from .lex import lex, LexError
 from .parse import parse, ParseError
 from .ident_table import IdentTable
+from .dot import to_dot
 import sys
 
 def repl():
@@ -17,18 +18,24 @@ def repl():
         try:
             node = parse(lex(command))
             try:
-                res = node.eval(table)
-                res_s = ''
-                if type(res) == bool:
-                    res_s = str(res)
+                if len(sys.argv) == 2 and sys.argv[1] == '-dot':
+                    print(to_dot(node))
                 else:
-                    res_s = str(round(res, 3))
+                    res = node.eval(table)
+                    res_s = ''
+                    if type(res) == bool:
+                        res_s = str(res)
+                    else:
+                        res_s = str(round(res, 3))
 
-                print(Fore.GREEN + res_s)
+                    print(Fore.GREEN + res_s)
             except RuntimeError as e:
-                print((Fore.RED + "Runtime error: ") + (Style.RESET_ALL + str(e)))
+                sys.stderr.write((Fore.RED + "Runtime error: ") +
+                        (Style.RESET_ALL + str(e)) + "\n")
         except ParseError as e:
-            print((Fore.RED + "Parse error: ") + (Style.RESET_ALL + e.message))
+            sys.stderr.write((Fore.RED + "Parse error: ") + (Style.RESET_ALL +
+                e.message) + "\n")
         except LexError as e:
-            print((Fore.RED + "Lex error: ") + (Style.RESET_ALL + e.message))
+            sys.stderr.write((Fore.RED + "Lex error: ") + (Style.RESET_ALL +
+                e.message) + "\n")
 
