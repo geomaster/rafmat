@@ -1,5 +1,5 @@
-from token import TokenType, Token
-from match_result import MatchResult
+from .token import TokenType, Token
+from .match_result import MatchResult
 
 LITERAL_TOKENS = [
         # 2 chars

@@ -1,7 +1,7 @@
-import ast_node as an
+import rafmat.ast_node as an
 from enum import Enum
-from token import Token, TokenType
-from parse_result import ParseResult
+from .token import Token, TokenType
+from .parse_result import ParseResult
 
 OP_PRIORITY = {
         # Assignment

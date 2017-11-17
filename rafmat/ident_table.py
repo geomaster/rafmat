@@ -1,6 +1,6 @@
-import function
 import math
-from variable import Variable
+import rafmat.function as function
+from .variable import Variable
 
 FUNCTIONS = {
         'sin': function.SinFunction(),

@@ -47,4 +47,4 @@ class LogFunction:
         self.args_count = 1
 
     def call(self, args):
-        return math.log(args[0])
+        return math.log10(args[0])

@@ -40,6 +40,9 @@ class FunctionCallAstNode:
 
         return fn.call([n.eval(ident_table) for n in self.param_nodes])
 
+    def is_int(self):
+        return False
+
     def __repr__(self):
         params = ', '.join([str(p) for p in self.param_nodes])
         return '`{}`({})'.format(self.name, params)
