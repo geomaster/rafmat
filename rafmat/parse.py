@@ -34,11 +34,11 @@ def is_operand(token):
 
 def node_from_operand(operand):
     if operand.type == TokenType.IDENT:
-        return an.VariableAstNode(operand.value)
+        return an.Variable(operand.value)
     elif operand.type == TokenType.INTEGER_NUMBER:
-        return an.NumberAstNode(operand.value, True)
+        return an.Number(operand.value, True)
     elif operand.type == TokenType.DECIMAL_NUMBER:
-        return an.NumberAstNode(operand.value, False)
+        return an.Number(operand.value, False)
     else:
         raise ValueError("Not a valid operand: " + str(operand))
 
@@ -72,35 +72,35 @@ def node_from_function_call(name, tokens, pos):
 
         pos += 1
 
-    return ParseResult(an.FunctionCallAstNode(name,
+    return ParseResult(an.FunctionCall(name,
         [parse_parenthesised(parenthesize(arg), 0).node for
         arg in args]), pos)
 
 def node_from_operator(operator, left_operand, right_operand):
     t = operator.type
     if t == TokenType.OP_PLUS:
-        return an.PlusAstNode(left_operand, right_operand)
+        return an.Plus(left_operand, right_operand)
     elif t == TokenType.OP_MINUS:
-        return an.MinusAstNode(left_operand, right_operand)
+        return an.Minus(left_operand, right_operand)
     elif t == TokenType.OP_MULTIPLY:
-        return an.MultiplyAstNode(left_operand, right_operand)
+        return an.Multiply(left_operand, right_operand)
     elif t == TokenType.OP_DIVIDE:
-        return an.DivideAstNode(left_operand, right_operand)
+        return an.Divide(left_operand, right_operand)
     elif t == TokenType.OP_GREATER:
-        return an.GreaterAstNode(left_operand, right_operand)
+        return an.Greater(left_operand, right_operand)
     elif t == TokenType.OP_GREATER_EQUAL:
-        return an.GreaterEqualAstNode(left_operand, right_operand)
+        return an.GreaterEqual(left_operand, right_operand)
     elif t == TokenType.OP_LESS:
-        return an.LessAstNode(left_operand, right_operand)
+        return an.Less(left_operand, right_operand)
     elif t == TokenType.OP_LESS_EQUAL:
-        return an.LessEqualAstNode(left_operand, right_operand)
+        return an.LessEqual(left_operand, right_operand)
     elif t == TokenType.OP_EQUAL:
-        return an.EqualAstNode(left_operand, right_operand)
+        return an.Equal(left_operand, right_operand)
     elif t == TokenType.OP_ASSIGN:
-        if not isinstance(left_operand, an.VariableAstNode):
+        if not isinstance(left_operand, an.Variable) and not isinstance(left_operand, an.Assignment):
             raise ParseError(-1, "Invalid assignment")
 
-        return an.AssignmentAstNode(left_operand.name, right_operand)
+        return an.Assignment(left_operand, right_operand)
     else:
         raise ValueError("Not a valid operator: " + str(operator))
 
@@ -184,5 +184,19 @@ def parse_parenthesised(tokens, pos):
 
     return ParseResult(node, pos)
 
+def verify_break_on_assignment(node):
+    if isinstance(node, an.Assignment):
+        raise ParseError(-1, "No concatenated assignments allowed")
+
+    node.visit_children(verify_break_on_assignment)
+
+def verify(node):
+    fn = verify
+    if isinstance(node, an.Assignment):
+        fn = verify_break_on_assignment
+
+    node.visit_children(fn)
+    return node
+
 def parse(tokens):
-    return parse_parenthesised(parenthesize(tokens), 0).node
+    return verify(parse_parenthesised(parenthesize(tokens), 0).node)

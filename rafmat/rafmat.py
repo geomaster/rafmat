@@ -18,7 +18,13 @@ def repl():
             node = parse(lex(command))
             try:
                 res = node.eval(table)
-                print(Fore.GREEN + str(round(res, 3)))
+                res_s = ''
+                if type(res) == bool:
+                    res_s = str(res)
+                else:
+                    res_s = str(round(res, 3))
+
+                print(Fore.GREEN + res_s)
             except RuntimeError as e:
                 print((Fore.RED + "Runtime error: ") + (Style.RESET_ALL + str(e)))
         except ParseError as e:
